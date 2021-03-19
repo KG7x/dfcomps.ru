@@ -1,0 +1,42 @@
+name: Mega-Linter
+
+on: [push, pull_request]
+
+jobs:
+  cancel_duplicates:
+    name: Cancel duplicate jobs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: fkirc/skip-duplicate-actions@master
+        with:
+          github_token: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
+
+  build:
+    name: Mega-Linter
+    runs-on: ubuntu-latest
+    steps:
+      # Git Checkout
+      - name: Checkout Code
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      # Mega-Linter
+      - name: Mega-Linter
+        id: ml
+        uses: nvuillam/mega-linter@v4
+        env:
+          VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }} # Validates all source when push on master, else just the git diff with master. Override with true if you always want to lint all sources
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DISABLE: COPYPASTE
+
+      # Upload Mega-Linter artifacts
+      - name: Archive production artifacts
+        if: ${{ success() }} || ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: Mega-Linter reports
+          path: |
+            report
+            mega-linter.log
