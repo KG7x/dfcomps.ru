@@ -29,7 +29,6 @@ jobs:
         env:
           VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }} # Validates all source when push on master, else just the git diff with master. Override with true if you always want to lint all sources
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ENABLE: TYPESCRIPT
          # DISABLE: COPYPASTE
 
       # Upload Mega-Linter artifacts
