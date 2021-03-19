@@ -81,15 +81,7 @@
                 до команды судьи об остановке раунда (STOP TIME). 
             </p>
             <p>
-                <b>5.1.4</b> Очки за раунд 
-                рассчитываются исходя из общего количества игроков на турнире &ndash; игрок,
-                занявший первое место получает число очков, равное числу участников, второй игрок получает на
-                одно очко меньше, третий - еще на одно меньше и так далее.
-            </p>
-            <p>
-                <b>5.1.5</b> Общий зачет идет по сумме набранных
-                очков во всех раундах, при одинаковом количестве очков считается, что игроки заняли одинаковые
-                места (нет тай-брейка и дополнительных показателей).
+                <b>5.1.4</b> Подведение результатов происходит по ЕЕ-системе.
             </p>
             <p>
                 <b>5.2</b> Запрещено умышленно имитировать потерю или задержку пакетов в сети.
@@ -147,9 +139,20 @@
             <p>
                 <b>6.3.4</b> Два вида овербаунсов всегда считаются рандомными, если в описании турнира 
                 напрямую не разрешены такие овербаунсы:<br>
-                &ndash; Овербаунсы с использованием нетвердых брашей (вода, лава, и т.п.);<br>
-                &ndash; Sticky-овербаунсы, которые возникают только при определенных условиях, которые должны 
+                &ndash; овербаунсы с использованием нетвердых брашей (вода, лава, и т.п.);<br>
+                &ndash; sticky-овербаунсы, которые возникают только при определенных условиях, которые должны 
                 возникнуть до начала прыжка.
+            </p>
+            <p>
+                <b>6.3.5</b> Рандомные овербаунсы являются причиной отклонения демо при валидации в двух случаях:<br>
+                &ndash; овербаунс повлиял на распределение мест в таблице<br>
+                &ndash; овербаунс повлиял на все распределение очков по
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLScdbpcs6rczpF1C_TQ4IFUxUqARq9MXygeP9Ru2sjZl3cdUDA/viewform">EE-системе</a>.<br>
+                <i>Примеры:</i> <br>
+                1) В турнире по ЕЕ-системе любой овербаунс, который дал плюс в топ1 демке повлияет на распределение очков во всей таблице, потому
+                что очки рассчитываются от времени первого места. Поэтому такая демка будет невалидна.<br>
+                2) Игрок использовал рандомный овербаунс, чтобы пропустить трикс на карте, но не получил достаточного преимущества, чтобы встать на строчку выше в таблице.
+                В этом случае демо также будет невалидным, потому что без рандомного овербаунса игрок мог не пройти карту вообще, поэтому он бы вообще не попал в таблицу.
             </p>
             <p>
                 <b>6.4</b> Запрещен таймресет (обнуление стартового триггера, при котором уже 
@@ -158,6 +161,12 @@
             <p>
                 <b>6.5</b> Запрещено использование для получения преимущества особенностей карт (двери, кнопки и прочее),
                 положение или состояние которых отличается от изначальных при использовании map_restart.
+            </p>
+            <p>
+                <b>6.6</b> Принимаются только демо, записанные во время проведения турнира.
+            </p>
+            <p>
+                <b>6.7</b> В тимран турнирах таймы всех участников команды должны быть записаны в одно время.
             </p>
         </div>
     </div>
@@ -248,15 +257,8 @@
                 referee's message about the round end (STOP TIME message).
             </p>
             <p>
-                <b>5.1.4</b> Points per round are calculated based on the total number of 
-                players in the tournament &ndash; first place player gets the number of 
-                points equal to the number of participants, the second place player gets one 
-                point less, third place player gets one more point less, and so on.
-            </p>
-            <p>
-                <b>5.1.5</b> The overall standings are calculated based on a sum of points
-                scored in all rounds. Players who get same scores are considered as equally
-                placed players (there is no tie-break and additional indicators).
+                <b>5.1.4</b> The results are calculated according to the 
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLScdbpcs6rczpF1C_TQ4IFUxUqARq9MXygeP9Ru2sjZl3cdUDA/viewform">EE-system</a>.
             </p>
             <p>
                 <b>5.2</b> It's not allowed to drop nor delay packets (network) on purpose (net settings).
@@ -312,9 +314,19 @@
             <p>
                 <b>6.3.4</b> Two types of overbounces are always considered random, if tournament rules
                 don’t explicitly tell otherwise:<br>
-                &ndash; Overbounces using non-solid brushes (water, lava, etc.);<br>
-                &ndash; Sticky overbounces, which can be done only in certain conditions, which should
+                &ndash; overbounces using non-solid brushes (water, lava, etc.);<br>
+                &ndash; sticky overbounces, which can be done only in certain conditions, which should
                  happen before the overbounce jump.
+            </p>
+            <p>
+                <b>6.3.5</b> Random overbounces cause a demo to be rejected during validation in two cases:<br>
+                &ndash; overbounce affected the distribution of places in the table<br>
+                &ndash; overbounce affected the whole distribution of points according to the EE-system<br>
+                <i>Examples:</i> <br>
+                1) In an EE-system tournament, any overbounce that gave a plus in the top1 demo will affect the distribution of points in the entire table, because points 
+                are calculated from the time of the first place. Therefore, such demo will be invalid.<br>
+                2) The player used a random overbounce to skip the trix on the map, but did not get enough advantage to move up the table. In this case, the demo will also be invalid, 
+                because without a random overbounce, the player may not have passed the map, so he would not have gotten into the table at all.
             </p>
             <p>
                 <b>6.4</b> It is not allowed to use time reset (using the start 
@@ -323,6 +335,12 @@
             <p>
                 <b>6.5</b> It is not allowed to use for advantage map features, like doors, buttons, etc.,
                 which differ from those when using map_restart.
+            </p>
+            <p>
+                <b>6.6</b> Only demos recorded during the tournament are accepted.
+            </p>
+            <p>
+                <b>6.7</b> In teamrun competitions all team players times must be recorded at one time.
             </p>
         </div>
     </div>

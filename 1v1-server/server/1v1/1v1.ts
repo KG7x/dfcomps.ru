@@ -1,4 +1,4 @@
-const config = require('./config.json');
+const config = require('./../config.json');
 
 import { DuelWebsocketClientActions } from './enums/duel-websocket-client-actions.enum';
 import { DuelClientMessage } from './types/duel-client-message.type';
@@ -15,6 +15,7 @@ import { MatchInterface } from './interfaces/match.interface';
 import { PickbanMapServerInterface } from './interfaces/pickban-map-server.interface';
 import { ServerMatchInterface } from './interfaces/server-match.interface';
 import { maps } from './constants/maps';
+import { routes } from './config/routes';
 
 interface QueueInterface {
     playerId: string;
@@ -34,6 +35,7 @@ export class OneVOneHandler {
     private finishedMatchPlayers$ = new BehaviorSubject<string[]>([]);
 
     public addClient(playerId: string, socket: WebSocket, uniqueId: string): void {
+        // TODO Перевести все логи на текстовые
         console.log('CHECKING FOR EXISTING CLIENT');
         console.log(this.clients$.value.map((client) => ({ playerId: client.playerId, uniqueId: client.uniqueId })));
 
@@ -57,6 +59,8 @@ export class OneVOneHandler {
             // кейс обновления страницы, предыдущий сокет при этом должен быть закрыт; тогда обновляем сокет для клиента
             // либо каким-то образом с одной страницы было создано два сокета
             this.clients$.next(this.clients$.value.map((client: ClientInterface) => (client.playerId === playerId ? { uniqueId, playerId, socket } : client)));
+
+            return;
         }
 
         this.clients$.next([
@@ -102,8 +106,9 @@ export class OneVOneHandler {
                 return;
             }
 
-            this.addPlayerToQueue(message.playerId, message.payload.physics);
-            this.send(socket, { action: DuelWebsocketServerActions.JOIN_QUEUE_SUCCESS });
+            this.send(socket, { action: DuelWebsocketServerActions.JOIN_QUEUE_SUCCESS }, () =>
+                this.addPlayerToQueue(message.playerId, message.payload.physics),
+            );
         }
 
         if (message.action === DuelWebsocketClientActions.GET_PLAYER_STATE) {
@@ -175,8 +180,9 @@ export class OneVOneHandler {
         this.send(socket, { action: DuelWebsocketServerActions.DUPLICATE_CLIENT });
     }
 
-    private send(socket: WebSocket, message: DuelServerMessageType): void {
-        socket.send(JSON.stringify(message));
+    private send(socket: WebSocket, message: DuelServerMessageType, callback?: () => void): void {
+        callback ? socket.send(JSON.stringify(message), callback) : socket.send(JSON.stringify(message));
+
         console.log(`sent: ${JSON.stringify(message)}`);
     }
 
@@ -198,7 +204,7 @@ export class OneVOneHandler {
         const map3: string = maps.filter((map) => ![map1, map2].includes(map))[Math.floor(Math.random() * (maps.length - 2))];
         const map4: string = maps.filter((map) => ![map1, map2, map3].includes(map))[Math.floor(Math.random() * (maps.length - 3))];
         const map5: string = maps.filter((map) => ![map1, map2, map3, map4].includes(map))[Math.floor(Math.random() * (maps.length - 4))];
-        const randomMaps: string[] = [map1, map2, map3, map4, map5]
+        const randomMaps: string[] = [map1, map2, map3, map4, map5];
 
         console.log(`randomMaps: ${JSON.stringify(randomMaps)}`);
 
@@ -232,15 +238,21 @@ export class OneVOneHandler {
             bannedMapsCount: 0,
         };
 
-        this.setCheckForBanTimer(0, isFirstPlayerBanning ? firstPlayerId : secondPlayerId);
-        this.matches$.next([...this.matches$.value, serverMatch]);
-
-        this.doAxiosPostRequest('https://dfcomps.ru/api/match/start', {
+        this.doAxiosPostRequest(`${this.getRoutePrefix()}/api/match/start`, {
             firstPlayerId,
             secondPlayerId,
             physics,
             secretKey: config.DUELS_SERVER_PRIVATE_KEY,
-        }).then(() => this.sendPickBanStepsToMatchPlayers(match));
+        })
+            .then(() => {
+                this.setCheckForBanTimer(0, isFirstPlayerBanning ? firstPlayerId : secondPlayerId);
+                this.matches$.next([...this.matches$.value, serverMatch]);
+                this.sendPickBanStepsToMatchPlayers(match);
+            })
+            .catch(() => {
+                // TODO Обработать ошибку
+                console.log('rest backend server error');
+            });
     }
 
     private sendPickBanStepsToMatchPlayers(match: MatchInterface): void {
@@ -389,7 +401,7 @@ export class OneVOneHandler {
                 .find((map: PickbanMapServerInterface) => !map.isBannedByFirstPlayer && !map.isBannedBySecondPlayer);
 
             if (pickedMap) {
-                this.doAxiosPostRequest('https://dfcomps.ru/api/match/update_match_map', {
+                this.doAxiosPostRequest(`${this.getRoutePrefix()}/api/match/update_match_map`, {
                     firstPlayerId: match.firstPlayerId,
                     secondPlayerId: match.secondPlayerId,
                     map: pickedMap.name,
@@ -462,7 +474,7 @@ export class OneVOneHandler {
             .pipe(
                 switchMap(() =>
                     from(
-                        this.doAxiosPostRequest('https://dfcomps.ru/api/match/finish', {
+                        this.doAxiosPostRequest(`${this.getRoutePrefix()}/api/match/finish`, {
                             firstPlayerId,
                             secondPlayerId,
                             secretKey: config.DUELS_SERVER_PRIVATE_KEY,
@@ -487,6 +499,8 @@ export class OneVOneHandler {
                     });
                 }
 
+                console.log(`finishing match between ${firstClient?.playerId} and ${secondClient?.playerId}`);
+
                 this.finishedMatchPlayers$.next([...this.finishedMatchPlayers$.value, firstPlayerId, secondPlayerId]);
                 this.matches$.next(
                     this.matches$.value.filter(
@@ -502,5 +516,9 @@ export class OneVOneHandler {
         Object.entries(formData).forEach(([key, value]: [string, any]) => params.append(key, value));
 
         return axios.post(url, params);
+    }
+
+    private getRoutePrefix(): string {
+        return process.env.ENV ? routes[process.env.ENV] : 'http://localhost';
     }
 }
